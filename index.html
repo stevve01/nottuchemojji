@@ -1,9 +1,80 @@
 <html>
 <head>
-  <title>Do Not Wake Up the Emoji - Enhanced</title>
+  <title>Do Not Wake Up the Emoji - Fixed</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-    /* Styles omitted for brevity, but include animations, transitions, etc. */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background-color: #f7f0e6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Poppins', sans-serif;
+      color: #2c2c2c;
+      overflow: hidden;
+    }
+    .top-bar {
+      width: 100%;
+      background-color: #ffffff;
+      padding: 18px 0;
+      text-align: center;
+      z-index: 10;
+    }
+    .message {
+      font-size: 26px;
+      font-weight: 600;
+    }
+    .emoji-container {
+      flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .emoji {
+      font-size: 150px;
+      transition: all 0.4s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .emoji.active {
+      transform: scale(1.2);
+    }
+    .sleepy-text {
+      font-size: 24px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      text-align: center;
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .overlay-text {
+      color: white;
+      font-size: 36px;
+      text-align: center;
+    }
+    .secret-timer {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      font-size: 16px;
+      color: #8a8a8a;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
@@ -14,25 +85,17 @@
     <div class="emoji" id="sleepyEmoji">😴</div>
     <div class="sleepy-text" id="sleepyText"></div>
   </div>
-  <div class="police left" id="policeLeft">👮</div>
-  <div class="police right" id="policeRight">👮</div>
   <div class="overlay" id="arrestOverlay">
-    <div class="overlay-text">You've been arrested! Bad Ending!</div>
+    <div class="overlay-text">You've been arrested by the Emoji Police! Bad Ending!</div>
   </div>
   <div class="overlay" id="goodEndingOverlay">
-    <div class="overlay-text">Good Ending!</div>
+    <div class="overlay-text">Good Ending! The emoji fell back asleep.</div>
   </div>
   <div class="overlay" id="trueEndingOverlay">
-    <div class="overlay-text">True Ending! You get a wish!</div>
+    <div class="overlay-text">True Ending! You've earned the emoji's respect.</div>
   </div>
   <div class="overlay" id="impatientEndingOverlay">
     <div class="overlay-text">Impatient Ending! The emoji is too angry to continue!</div>
-  </div>
-  <div class="overlay" id="curiosityEndingOverlay">
-    <div class="overlay-text">Curiosity Ending! The emoji wonders why you stopped poking...</div>
-  </div>
-  <div class="overlay" id="panicEndingOverlay">
-    <div class="overlay-text">Panic Ending! The emoji is panicking and runs away!</div>
   </div>
   <div class="secret-timer" id="secretTimer">Secret Ending Timer: 24:00:00</div>
 
@@ -42,102 +105,59 @@
     let gameStartTime = Date.now();
     const emoji = document.getElementById('sleepyEmoji');
     const text = document.getElementById('sleepyText');
-    const policeLeft = document.getElementById('policeLeft');
-    const policeRight = document.getElementById('policeRight');
     const arrestOverlay = document.getElementById('arrestOverlay');
     const goodEndingOverlay = document.getElementById('goodEndingOverlay');
     const trueEndingOverlay = document.getElementById('trueEndingOverlay');
     const impatientEndingOverlay = document.getElementById('impatientEndingOverlay');
-    const curiosityEndingOverlay = document.getElementById('curiosityEndingOverlay');
-    const panicEndingOverlay = document.getElementById('panicEndingOverlay');
     const secretTimer = document.getElementById('secretTimer');
-    const emojis = ['😴', '😑', '😒', '😠', '😡', '🤬', '😆', '😭', '😱'];
+    const emojis = ['😴', '😒', '😠', '😡', '🤬'];
 
     emoji.addEventListener('click', () => {
       tapCount++;
       lastTapTime = Date.now();
-      emoji.classList.add('active');
 
       // Update emoji expression based on tap count
-      const emojiIndex = Math.min(Math.floor(tapCount * 0.1), emojis.length - 1);
+      const emojiIndex = Math.min(Math.floor(tapCount / 5), emojis.length - 1);
       emoji.textContent = emojis[emojiIndex];
 
       // Update message text
       if (tapCount === 1) {
-        text.textContent = "zzzzzzzz... i'm busy napping right now...";
-      } else if (tapCount === 2) {
-        text.textContent = "...please... let me... sleep...";
+        text.textContent = "zzzzzz... let me sleep...";
       } else if (tapCount === 5) {
-        text.textContent = "Okay, this is getting annoying...";
+        text.textContent = "This is getting annoying!";
       } else if (tapCount === 10) {
-        text.textContent = "I'm warning you, stop poking me!";
-      } else if (tapCount === 20) {
-        text.textContent = "That's it! I'm calling the emoji police!";
+        text.textContent = "Stop poking me!";
+      } else if (tapCount === 15) {
+        text.textContent = "That's it! I'm calling the police!";
         callPolice();
-      } else if (tapCount > 50) {
-        panicEnding();
-      } else {
-        text.textContent = "";
       }
 
+      // Clear text after 3 seconds
       text.style.opacity = '1';
       setTimeout(() => {
         text.style.opacity = '0';
-        emoji.classList.remove('active');
       }, 3000);
-
-      // Impatient Ending if clicked too rapidly
-      if (tapCount >= 30 && (Date.now() - lastTapTime) < 1000) {
-        showOverlay(impatientEndingOverlay);
-      }
-
-      // Curiosity Ending: User stops tapping for a long time
-      if (tapCount > 10 && (Date.now() - lastTapTime) > 120000) {
-        showOverlay(curiosityEndingOverlay);
-      }
     });
 
     function callPolice() {
       setTimeout(() => {
-        policeLeft.style.left = '25%';
-        policeRight.style.right = '25%';
-
-        setTimeout(() => {
-          policeLeft.style.left = '50%';
-          policeLeft.style.transform = 'translate(-100%, -50%)';
-          policeRight.style.right = '50%';
-          policeRight.style.transform = 'translate(100%, -50%)';
-
-          setTimeout(() => {
-            arrestOverlay.style.opacity = '1';
-            emoji.style.opacity = '0';
-            text.style.opacity = '0';
-          }, 1000);
-        }, 1000);
+        arrestOverlay.style.opacity = '1';
+        emoji.style.opacity = '0';
+        text.style.opacity = '0';
       }, 1000);
-    }
-
-    function panicEnding() {
-      emoji.style.opacity = '0';
-      showOverlay(panicEndingOverlay);
-    }
-
-    function showOverlay(overlayElement) {
-      overlayElement.style.opacity = '1';
-      setTimeout(() => {
-        overlayElement.style.opacity = '0';
-      }, 5000);
     }
 
     function checkEndings() {
       const currentTime = Date.now();
 
-      if (tapCount === 19 && (currentTime - lastTapTime) >= 120000) {
+      // Check for good ending (wait 2 minutes without tapping)
+      if (tapCount === 14 && (currentTime - lastTapTime) >= 120000) {
         goodEndingOverlay.style.opacity = '1';
         emoji.textContent = '😴';
         return;
       }
 
+      // Check for true ending (wait 24 hours without tapping)
       if (tapCount === 0 && (currentTime - gameStartTime) >= 86400000) {
         trueEndingOverlay.style.opacity = '1';
         emoji.textContent = '🧞';
