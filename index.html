@@ -1,0 +1,172 @@
+<html>
+<head>
+  <title>Do Not Wake Up the Emoji - Enhanced</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+    /* Styles omitted for brevity, but include animations, transitions, etc. */
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="message">Do Not Wake Up The Emoji</div>
+  </div>
+  <div class="emoji-container">
+    <div class="emoji" id="sleepyEmoji">😴</div>
+    <div class="sleepy-text" id="sleepyText"></div>
+  </div>
+  <div class="police left" id="policeLeft">👮</div>
+  <div class="police right" id="policeRight">👮</div>
+  <div class="overlay" id="arrestOverlay">
+    <div class="overlay-text">You've been arrested! Bad Ending!</div>
+  </div>
+  <div class="overlay" id="goodEndingOverlay">
+    <div class="overlay-text">Good Ending!</div>
+  </div>
+  <div class="overlay" id="trueEndingOverlay">
+    <div class="overlay-text">True Ending! You get a wish!</div>
+  </div>
+  <div class="overlay" id="impatientEndingOverlay">
+    <div class="overlay-text">Impatient Ending! The emoji is too angry to continue!</div>
+  </div>
+  <div class="overlay" id="curiosityEndingOverlay">
+    <div class="overlay-text">Curiosity Ending! The emoji wonders why you stopped poking...</div>
+  </div>
+  <div class="overlay" id="panicEndingOverlay">
+    <div class="overlay-text">Panic Ending! The emoji is panicking and runs away!</div>
+  </div>
+  <div class="secret-timer" id="secretTimer">Secret Ending Timer: 24:00:00</div>
+
+  <script>
+    let tapCount = 0;
+    let lastTapTime = Date.now();
+    let gameStartTime = Date.now();
+    const emoji = document.getElementById('sleepyEmoji');
+    const text = document.getElementById('sleepyText');
+    const policeLeft = document.getElementById('policeLeft');
+    const policeRight = document.getElementById('policeRight');
+    const arrestOverlay = document.getElementById('arrestOverlay');
+    const goodEndingOverlay = document.getElementById('goodEndingOverlay');
+    const trueEndingOverlay = document.getElementById('trueEndingOverlay');
+    const impatientEndingOverlay = document.getElementById('impatientEndingOverlay');
+    const curiosityEndingOverlay = document.getElementById('curiosityEndingOverlay');
+    const panicEndingOverlay = document.getElementById('panicEndingOverlay');
+    const secretTimer = document.getElementById('secretTimer');
+    const emojis = ['😴', '😑', '😒', '😠', '😡', '🤬', '😆', '😭', '😱'];
+
+    emoji.addEventListener('click', () => {
+      tapCount++;
+      lastTapTime = Date.now();
+      emoji.classList.add('active');
+
+      // Update emoji expression based on tap count
+      const emojiIndex = Math.min(Math.floor(tapCount * 0.1), emojis.length - 1);
+      emoji.textContent = emojis[emojiIndex];
+
+      // Update message text
+      if (tapCount === 1) {
+        text.textContent = "zzzzzzzz... i'm busy napping right now...";
+      } else if (tapCount === 2) {
+        text.textContent = "...please... let me... sleep...";
+      } else if (tapCount === 5) {
+        text.textContent = "Okay, this is getting annoying...";
+      } else if (tapCount === 10) {
+        text.textContent = "I'm warning you, stop poking me!";
+      } else if (tapCount === 20) {
+        text.textContent = "That's it! I'm calling the emoji police!";
+        callPolice();
+      } else if (tapCount > 50) {
+        panicEnding();
+      } else {
+        text.textContent = "";
+      }
+
+      text.style.opacity = '1';
+      setTimeout(() => {
+        text.style.opacity = '0';
+        emoji.classList.remove('active');
+      }, 3000);
+
+      // Impatient Ending if clicked too rapidly
+      if (tapCount >= 30 && (Date.now() - lastTapTime) < 1000) {
+        showOverlay(impatientEndingOverlay);
+      }
+
+      // Curiosity Ending: User stops tapping for a long time
+      if (tapCount > 10 && (Date.now() - lastTapTime) > 120000) {
+        showOverlay(curiosityEndingOverlay);
+      }
+    });
+
+    function callPolice() {
+      setTimeout(() => {
+        policeLeft.style.left = '25%';
+        policeRight.style.right = '25%';
+
+        setTimeout(() => {
+          policeLeft.style.left = '50%';
+          policeLeft.style.transform = 'translate(-100%, -50%)';
+          policeRight.style.right = '50%';
+          policeRight.style.transform = 'translate(100%, -50%)';
+
+          setTimeout(() => {
+            arrestOverlay.style.opacity = '1';
+            emoji.style.opacity = '0';
+            text.style.opacity = '0';
+          }, 1000);
+        }, 1000);
+      }, 1000);
+    }
+
+    function panicEnding() {
+      emoji.style.opacity = '0';
+      showOverlay(panicEndingOverlay);
+    }
+
+    function showOverlay(overlayElement) {
+      overlayElement.style.opacity = '1';
+      setTimeout(() => {
+        overlayElement.style.opacity = '0';
+      }, 5000);
+    }
+
+    function checkEndings() {
+      const currentTime = Date.now();
+
+      if (tapCount === 19 && (currentTime - lastTapTime) >= 120000) {
+        goodEndingOverlay.style.opacity = '1';
+        emoji.textContent = '😴';
+        return;
+      }
+
+      if (tapCount === 0 && (currentTime - gameStartTime) >= 86400000) {
+        trueEndingOverlay.style.opacity = '1';
+        emoji.textContent = '🧞';
+        return;
+      }
+
+      requestAnimationFrame(checkEndings);
+    }
+
+    function updateSecretTimer() {
+      const currentTime = Date.now();
+      const elapsedTime = currentTime - gameStartTime;
+      const remainingTime = Math.max(86400000 - elapsedTime, 0);
+
+      const hours = Math.floor(remainingTime / 3600000);
+      const minutes = Math.floor((remainingTime % 3600000) / 60000);
+      const seconds = Math.floor((remainingTime % 60000) / 1000);
+
+      secretTimer.textContent = `Secret Ending Timer: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+      if (remainingTime > 0) {
+        requestAnimationFrame(updateSecretTimer);
+      } else {
+        secretTimer.textContent = 'Secret Ending Timer: 00:00:00';
+      }
+    }
+
+    checkEndings();
+    updateSecretTimer();
+  </script>
+</body>
+</html>
