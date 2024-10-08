@@ -91,6 +91,36 @@
       cursor: pointer;
       font-size: 5vw;
     }
+    /* Story overlay */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      flex-direction: column;
+      z-index: 100;
+    }
+    .overlay-text {
+      font-size: 5vw;
+      margin-bottom: 3vh;
+      padding: 0 5vw;
+    }
+    .start-button {
+      background-color: #ffffff;
+      color: #2c2c2c;
+      padding: 2vh 5vw;
+      border: none;
+      font-size: 4vw;
+      cursor: pointer;
+      border-radius: 8px;
+    }
     /* For mobile responsiveness */
     @media (max-width: 768px) {
       .emoji {
@@ -125,6 +155,16 @@
   <!-- Power-Up -->
   <div class="power-up" id="powerUp">🔋</div>
 
+  <!-- Story and hint overlay -->
+  <div class="overlay" id="storyOverlay">
+    <div class="overlay-text">
+      Эмодзи наконец-то заснул после долгого дня. Но он очень капризный — любое прикосновение может его разбудить!
+      <br><br>
+      Ваша задача: не разбудить эмодзи! Каждое нажатие делает его всё злее, но вы можете собирать бонусы, чтобы вернуть терпение. Продвигайтесь через уровни, каждый из которых будет сложнее предыдущего.
+    </div>
+    <button class="start-button" id="startButton">Начать игру</button>
+  </div>
+
   <script>
     let tapCount = 0;
     let health = 100;
@@ -134,6 +174,8 @@
     const text = document.getElementById('sleepyText');
     const healthBar = document.getElementById('healthBar');
     const powerUp = document.getElementById('powerUp');
+    const storyOverlay = document.getElementById('storyOverlay');
+    const startButton = document.getElementById('startButton');
     const messages = ['😴', '😒', '😠', '😡', '🤬'];
 
     // Sounds for each emoji state
@@ -146,6 +188,10 @@
     ];
 
     const powerUpSound = new Audio('https://www.myinstants.com/media/sounds/powerup.mp3');
+
+    startButton.addEventListener('click', () => {
+      storyOverlay.style.display = 'none'; // Hide the story and start the game
+    });
 
     emoji.addEventListener('click', () => {
       tapCount++;
