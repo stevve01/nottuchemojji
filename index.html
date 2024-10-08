@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>Do Not Wake Up the Emoji - Mobile Optimized</title>
+  <title>Do Not Wake Up the Emoji - Expanded Features</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
@@ -25,7 +25,7 @@
       z-index: 10;
     }
     .message {
-      font-size: 5vw; /* Adjusted for mobile */
+      font-size: 5vw;
       font-weight: 600;
     }
     .emoji-container {
@@ -35,7 +35,7 @@
       align-items: center;
     }
     .emoji {
-      font-size: 30vw; /* Responsive font size for mobile */
+      font-size: 30vw;
       transition: all 0.4s ease;
       cursor: pointer;
       user-select: none;
@@ -67,7 +67,7 @@
     }
     .overlay-text {
       color: white;
-      font-size: 6vw; /* Optimized for mobile */
+      font-size: 6vw;
       margin-bottom: 4vh;
     }
     .restart-button {
@@ -75,9 +75,19 @@
       color: #2c2c2c;
       padding: 2vh 5vw;
       border: none;
-      font-size: 4.5vw; /* Mobile-friendly size */
+      font-size: 4.5vw;
       cursor: pointer;
       border-radius: 8px;
+    }
+    .difficulty-button {
+      background-color: #4caf50;
+      color: #ffffff;
+      padding: 1vh 3vw;
+      border: none;
+      font-size: 4vw;
+      cursor: pointer;
+      border-radius: 5px;
+      margin: 2vw;
     }
     .progress-bar {
       position: fixed;
@@ -103,6 +113,14 @@
     <div class="sleepy-text" id="sleepyText"></div>
   </div>
 
+  <!-- Difficulty Selection -->
+  <div class="overlay" id="difficultyOverlay">
+    <div class="overlay-text">Choose Your Difficulty</div>
+    <button class="difficulty-button" onclick="startGame('easy')">Easy</button>
+    <button class="difficulty-button" onclick="startGame('medium')">Medium</button>
+    <button class="difficulty-button" onclick="startGame('hard')">Hard</button>
+  </div>
+
   <!-- Multiple Overlays for Endings -->
   <div class="overlay" id="badEndingOverlay">
     <div class="overlay-text">Bad Ending! You upset the emoji!</div>
@@ -110,6 +128,18 @@
   </div>
   <div class="overlay" id="goodEndingOverlay">
     <div class="overlay-text">Good Ending! The emoji fell back asleep.</div>
+    <button class="restart-button" onclick="restartGame()">Restart Game</button>
+  </div>
+  <div class="overlay" id="comboMasterEndingOverlay">
+    <div class="overlay-text">Combo Master Ending! You achieved the perfect combo streak!</div>
+    <button class="restart-button" onclick="restartGame()">Restart Game</button>
+  </div>
+  <div class="overlay" id="collectorEndingOverlay">
+    <div class="overlay-text">Collector Ending! You unlocked all emojis!</div>
+    <button class="restart-button" onclick="restartGame()">Restart Game</button>
+  </div>
+  <div class="overlay" id="mysteryEmojiEndingOverlay">
+    <div class="overlay-text">Mystery Emoji Unlocked!</div>
     <button class="restart-button" onclick="restartGame()">Restart Game</button>
   </div>
 
@@ -122,40 +152,74 @@
     let tapCount = 0;
     let lastTapTime = Date.now();
     let gameStartTime = Date.now();
-    let health = 100;  // Initial health/patience value
+    let health = 100;
+    let comboCount = 0;
+    let difficultyMultiplier = 1; // Multiplier for health drain based on difficulty
     const emoji = document.getElementById('sleepyEmoji');
     const text = document.getElementById('sleepyText');
     const healthBar = document.getElementById('healthBar');
     const badEndingOverlay = document.getElementById('badEndingOverlay');
     const goodEndingOverlay = document.getElementById('goodEndingOverlay');
+    const comboMasterEndingOverlay = document.getElementById('comboMasterEndingOverlay');
+    const collectorEndingOverlay = document.getElementById('collectorEndingOverlay');
+    const mysteryEmojiEndingOverlay = document.getElementById('mysteryEmojiEndingOverlay');
+    const difficultyOverlay = document.getElementById('difficultyOverlay');
 
-    const emojis = ['😴', '😒', '😠', '😡', '🤬'];
-    const backgroundColors = ['#f7f0e6', '#fbe8d3', '#f5c9c3', '#ff8a8a', '#ff4c4c'];
+    const emojis = ['😴', '😒', '😠', '😡', '🤬', '😎', '👽', '🦸‍♂️'];
+    const backgroundColors = ['#f7f0e6', '#fbe8d3', '#f5c9c3', '#ff8a8a', '#ff4c4c', '#fff68f', '#98fb98', '#87ceeb'];
+
+    function startGame(difficulty) {
+      difficultyOverlay.style.display = 'none';
+      switch(difficulty) {
+        case 'easy':
+          difficultyMultiplier = 1;
+          break;
+        case 'medium':
+          difficultyMultiplier = 1.5;
+          break;
+        case 'hard':
+          difficultyMultiplier = 2;
+          break;
+      }
+      resetGame();
+    }
 
     emoji.addEventListener('click', () => {
       tapCount++;
       lastTapTime = Date.now();
+
+      // Combo Bonus: If player taps quickly and keeps emoji calm
+      if (comboCount < 10 && health > 50) {
+        comboCount++;
+        if (comboCount === 10) {
+          health = Math.min(100, health + 20); // Restore some health
+          showOverlay(comboMasterEndingOverlay);
+        }
+      }
 
       // Update emoji expression and background color based on tap count
       const emojiIndex = Math.min(Math.floor(tapCount / 5), emojis.length - 1);
       emoji.textContent = emojis[emojiIndex];
       document.body.style.backgroundColor = backgroundColors[emojiIndex];
 
-      // Update message text
-      if (tapCount === 1) {
-        text.textContent = "zzzzzz... let me sleep...";
-      } else if (tapCount === 5) {
-        text.textContent = "This is getting annoying!";
-      } else if (tapCount === 10) {
-        text.textContent = "Stop poking me!";
-      } else if (tapCount === 15) {
-        text.textContent = "That's it! I'm calling the police!";
-        triggerBadEnding();  // Trigger bad ending
+      // Mystery Emoji Ending after 50 taps
+      if (tapCount === 50) {
+        showOverlay(mysteryEmojiEndingOverlay);
       }
 
       // Update health bar
-      health -= 5;  // Reduce health with each tap
+      health -= 5 * difficultyMultiplier;  // Drain health faster on harder difficulties
       healthBar.style.width = health + '%';
+
+      // Check for bad ending (emoji becomes too angry)
+      if (health <= 0) {
+        showOverlay(badEndingOverlay);
+      }
+
+      // Check for collector ending (player reaches the last emoji)
+      if (emojiIndex === emojis.length - 1) {
+        showOverlay(collectorEndingOverlay);
+      }
 
       text.style.opacity = '1';
       setTimeout(() => {
@@ -163,33 +227,35 @@
       }, 3000);
     });
 
-    function triggerBadEnding() {
-      badEndingOverlay.style.opacity = '1';
-      badEndingOverlay.style.pointerEvents = 'all';
-    }
-
-    function triggerGoodEnding() {
-      goodEndingOverlay.style.opacity = '1';
-      goodEndingOverlay.style.pointerEvents = 'all';
+    function showOverlay(overlayElement) {
+      overlayElement.style.opacity = '1';
+      overlayElement.style.pointerEvents = 'all';
     }
 
     function restartGame() {
-      // Reset game state
+      resetGame();
+      hideAllOverlays();
+    }
+
+    function resetGame() {
       tapCount = 0;
       health = 100;
+      comboCount = 0;
       emoji.textContent = '😴';
       document.body.style.backgroundColor = '#f7f0e6';
       healthBar.style.width = '100%';
       text.textContent = '';
       text.style.opacity = '0';
+    }
 
-      // Hide any active overlays
-      badEndingOverlay.style.opacity = '0';
-      goodEndingOverlay.style.opacity = '0';
-      badEndingOverlay.style.pointerEvents = 'none';
-      goodEndingOverlay.style.pointerEvents = 'none';
+    function hideAllOverlays() {
+      [badEndingOverlay, goodEndingOverlay, comboMasterEndingOverlay, collectorEndingOverlay, mysteryEmojiEndingOverlay].forEach(overlay => {
+        overlay.style.opacity = '0';
+        overlay.style.pointerEvents = 'none';
+      });
     }
   </script>
 </body>
 </html>
+
 
