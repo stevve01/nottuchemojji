@@ -1,6 +1,7 @@
 <html>
 <head>
-  <title>Do Not Wake Up the Emoji - Full Expansion</title>
+  <title>Do Not Wake Up the Emoji - Mobile Optimized</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
     html, body {
@@ -19,12 +20,12 @@
     .top-bar {
       width: 100%;
       background-color: #ffffff;
-      padding: 18px 0;
+      padding: 3vh 0;
       text-align: center;
       z-index: 10;
     }
     .message {
-      font-size: 26px;
+      font-size: 5vw; /* Adjusted for mobile */
       font-weight: 600;
     }
     .emoji-container {
@@ -34,7 +35,7 @@
       align-items: center;
     }
     .emoji {
-      font-size: 150px;
+      font-size: 30vw; /* Responsive font size for mobile */
       transition: all 0.4s ease;
       cursor: pointer;
       user-select: none;
@@ -43,7 +44,7 @@
       transform: scale(1.2);
     }
     .sleepy-text {
-      font-size: 24px;
+      font-size: 4.5vw;
       opacity: 0;
       transition: opacity 0.5s ease;
       text-align: center;
@@ -61,25 +62,28 @@
       opacity: 0;
       pointer-events: none;
       z-index: 100;
+      text-align: center;
+      flex-direction: column;
     }
     .overlay-text {
       color: white;
-      font-size: 36px;
-      text-align: center;
+      font-size: 6vw; /* Optimized for mobile */
+      margin-bottom: 4vh;
     }
-    .secret-timer {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      font-size: 16px;
-      color: #8a8a8a;
-      z-index: 10;
+    .restart-button {
+      background-color: #ffffff;
+      color: #2c2c2c;
+      padding: 2vh 5vw;
+      border: none;
+      font-size: 4.5vw; /* Mobile-friendly size */
+      cursor: pointer;
+      border-radius: 8px;
     }
     .progress-bar {
       position: fixed;
-      bottom: 10px;
+      bottom: 5vh;
       width: 80%;
-      height: 20px;
+      height: 4vh;
       background-color: #ddd;
     }
     .progress {
@@ -99,31 +103,15 @@
     <div class="sleepy-text" id="sleepyText"></div>
   </div>
 
-  <!-- Multiple Overlays for Different Endings -->
-  <div class="overlay" id="arrestOverlay">
-    <div class="overlay-text">You've been arrested by the Emoji Police! Bad Ending!</div>
+  <!-- Multiple Overlays for Endings -->
+  <div class="overlay" id="badEndingOverlay">
+    <div class="overlay-text">Bad Ending! You upset the emoji!</div>
+    <button class="restart-button" onclick="restartGame()">Restart Game</button>
   </div>
   <div class="overlay" id="goodEndingOverlay">
     <div class="overlay-text">Good Ending! The emoji fell back asleep.</div>
+    <button class="restart-button" onclick="restartGame()">Restart Game</button>
   </div>
-  <div class="overlay" id="friendshipEndingOverlay">
-    <div class="overlay-text">Friendship Ending! You've become friends with the emoji.</div>
-  </div>
-  <div class="overlay" id="heroEndingOverlay">
-    <div class="overlay-text">Hero Ending! You saved the emoji from getting too angry.</div>
-  </div>
-  <div class="overlay" id="boredEndingOverlay">
-    <div class="overlay-text">Bored Ending! The emoji got bored and left.</div>
-  </div>
-  <div class="overlay" id="adventurerEndingOverlay">
-    <div class="overlay-text">Adventurer Ending! You've discovered all the secrets.</div>
-  </div>
-  <div class="overlay" id="timeTravelerEndingOverlay">
-    <div class="overlay-text">Time Traveler Ending! You've played over multiple days.</div>
-  </div>
-
-  <!-- Secret Timer -->
-  <div class="secret-timer" id="secretTimer">Secret Ending Timer: 24:00:00</div>
 
   <!-- Health/Patience Bar -->
   <div class="progress-bar">
@@ -134,19 +122,13 @@
     let tapCount = 0;
     let lastTapTime = Date.now();
     let gameStartTime = Date.now();
-    let health = 100;  // Initial health or patience
+    let health = 100;  // Initial health/patience value
     const emoji = document.getElementById('sleepyEmoji');
     const text = document.getElementById('sleepyText');
     const healthBar = document.getElementById('healthBar');
-    const arrestOverlay = document.getElementById('arrestOverlay');
+    const badEndingOverlay = document.getElementById('badEndingOverlay');
     const goodEndingOverlay = document.getElementById('goodEndingOverlay');
-    const friendshipEndingOverlay = document.getElementById('friendshipEndingOverlay');
-    const heroEndingOverlay = document.getElementById('heroEndingOverlay');
-    const boredEndingOverlay = document.getElementById('boredEndingOverlay');
-    const adventurerEndingOverlay = document.getElementById('adventurerEndingOverlay');
-    const timeTravelerEndingOverlay = document.getElementById('timeTravelerEndingOverlay');
-    const secretTimer = document.getElementById('secretTimer');
-    
+
     const emojis = ['😴', '😒', '😠', '😡', '🤬'];
     const backgroundColors = ['#f7f0e6', '#fbe8d3', '#f5c9c3', '#ff8a8a', '#ff4c4c'];
 
@@ -168,32 +150,12 @@
         text.textContent = "Stop poking me!";
       } else if (tapCount === 15) {
         text.textContent = "That's it! I'm calling the police!";
-        callPolice();
+        triggerBadEnding();  // Trigger bad ending
       }
 
       // Update health bar
       health -= 5;  // Reduce health with each tap
       healthBar.style.width = health + '%';
-
-      // Check for defender ending (player saves emoji from getting too angry)
-      if (tapCount >= 20 && health > 50) {
-        showOverlay(heroEndingOverlay);
-      }
-
-      // Bored Ending (no action for too long)
-      if (tapCount === 0 && (Date.now() - lastTapTime) > 300000) {
-        showOverlay(boredEndingOverlay);
-      }
-
-      // Time Traveler Ending (track multiple sessions)
-      if ((Date.now() - gameStartTime) > 86400000) {
-        showOverlay(timeTravelerEndingOverlay);
-      }
-
-      // Mini-Quest Example: Tap 10 times exactly for the adventurer ending
-      if (tapCount === 10 && health === 50) {
-        showOverlay(adventurerEndingOverlay);
-      }
 
       text.style.opacity = '1';
       setTimeout(() => {
@@ -201,61 +163,33 @@
       }, 3000);
     });
 
-    function callPolice() {
-      setTimeout(() => {
-        arrestOverlay.style.opacity = '1';
-        emoji.style.opacity = '0';
-        text.style.opacity = '0';
-      }, 1000);
+    function triggerBadEnding() {
+      badEndingOverlay.style.opacity = '1';
+      badEndingOverlay.style.pointerEvents = 'all';
     }
 
-    function showOverlay(overlayElement) {
-      overlayElement.style.opacity = '1';
-      setTimeout(() => {
-        overlayElement.style.opacity = '0';
-      }, 5000);
+    function triggerGoodEnding() {
+      goodEndingOverlay.style.opacity = '1';
+      goodEndingOverlay.style.pointerEvents = 'all';
     }
 
-    function checkEndings() {
-      const currentTime = Date.now();
+    function restartGame() {
+      // Reset game state
+      tapCount = 0;
+      health = 100;
+      emoji.textContent = '😴';
+      document.body.style.backgroundColor = '#f7f0e6';
+      healthBar.style.width = '100%';
+      text.textContent = '';
+      text.style.opacity = '0';
 
-      // Good Ending (wait 2 minutes without tapping)
-      if (tapCount === 14 && (currentTime - lastTapTime) >= 120000) {
-        goodEndingOverlay.style.opacity = '1';
-        emoji.textContent = '😴';
-        return;
-      }
-
-      // True Ending (wait 24 hours without tapping)
-      if (tapCount === 0 && (currentTime - gameStartTime) >= 86400000) {
-        timeTravelerEndingOverlay.style.opacity = '1';
-        emoji.textContent = '🧞';
-        return;
-      }
-
-      requestAnimationFrame(checkEndings);
+      // Hide any active overlays
+      badEndingOverlay.style.opacity = '0';
+      goodEndingOverlay.style.opacity = '0';
+      badEndingOverlay.style.pointerEvents = 'none';
+      goodEndingOverlay.style.pointerEvents = 'none';
     }
-
-    function updateSecretTimer() {
-      const currentTime = Date.now();
-      const elapsedTime = currentTime - gameStartTime;
-      const remainingTime = Math.max(86400000 - elapsedTime, 0);
-
-      const hours = Math.floor(remainingTime / 3600000);
-      const minutes = Math.floor((remainingTime % 3600000) / 60000);
-      const seconds = Math.floor((remainingTime % 60000) / 1000);
-
-      secretTimer.textContent = `Secret Ending Timer: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-      if (remainingTime > 0) {
-        requestAnimationFrame(updateSecretTimer);
-      } else {
-        secretTimer.textContent = 'Secret Ending Timer: 00:00:00';
-      }
-    }
-
-    checkEndings();
-    updateSecretTimer();
   </script>
 </body>
 </html>
+
