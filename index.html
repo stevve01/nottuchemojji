@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>Do Not Wake Up the Emoji - Fixed</title>
+  <title>Do Not Wake Up the Emoji - Full Expansion</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
     html, body {
@@ -75,6 +75,19 @@
       color: #8a8a8a;
       z-index: 10;
     }
+    .progress-bar {
+      position: fixed;
+      bottom: 10px;
+      width: 80%;
+      height: 20px;
+      background-color: #ddd;
+    }
+    .progress {
+      height: 100%;
+      background-color: #4caf50;
+      width: 100%;
+      transition: width 0.5s ease;
+    }
   </style>
 </head>
 <body>
@@ -85,40 +98,66 @@
     <div class="emoji" id="sleepyEmoji">😴</div>
     <div class="sleepy-text" id="sleepyText"></div>
   </div>
+
+  <!-- Multiple Overlays for Different Endings -->
   <div class="overlay" id="arrestOverlay">
     <div class="overlay-text">You've been arrested by the Emoji Police! Bad Ending!</div>
   </div>
   <div class="overlay" id="goodEndingOverlay">
     <div class="overlay-text">Good Ending! The emoji fell back asleep.</div>
   </div>
-  <div class="overlay" id="trueEndingOverlay">
-    <div class="overlay-text">True Ending! You've earned the emoji's respect.</div>
+  <div class="overlay" id="friendshipEndingOverlay">
+    <div class="overlay-text">Friendship Ending! You've become friends with the emoji.</div>
   </div>
-  <div class="overlay" id="impatientEndingOverlay">
-    <div class="overlay-text">Impatient Ending! The emoji is too angry to continue!</div>
+  <div class="overlay" id="heroEndingOverlay">
+    <div class="overlay-text">Hero Ending! You saved the emoji from getting too angry.</div>
   </div>
+  <div class="overlay" id="boredEndingOverlay">
+    <div class="overlay-text">Bored Ending! The emoji got bored and left.</div>
+  </div>
+  <div class="overlay" id="adventurerEndingOverlay">
+    <div class="overlay-text">Adventurer Ending! You've discovered all the secrets.</div>
+  </div>
+  <div class="overlay" id="timeTravelerEndingOverlay">
+    <div class="overlay-text">Time Traveler Ending! You've played over multiple days.</div>
+  </div>
+
+  <!-- Secret Timer -->
   <div class="secret-timer" id="secretTimer">Secret Ending Timer: 24:00:00</div>
+
+  <!-- Health/Patience Bar -->
+  <div class="progress-bar">
+    <div class="progress" id="healthBar"></div>
+  </div>
 
   <script>
     let tapCount = 0;
     let lastTapTime = Date.now();
     let gameStartTime = Date.now();
+    let health = 100;  // Initial health or patience
     const emoji = document.getElementById('sleepyEmoji');
     const text = document.getElementById('sleepyText');
+    const healthBar = document.getElementById('healthBar');
     const arrestOverlay = document.getElementById('arrestOverlay');
     const goodEndingOverlay = document.getElementById('goodEndingOverlay');
-    const trueEndingOverlay = document.getElementById('trueEndingOverlay');
-    const impatientEndingOverlay = document.getElementById('impatientEndingOverlay');
+    const friendshipEndingOverlay = document.getElementById('friendshipEndingOverlay');
+    const heroEndingOverlay = document.getElementById('heroEndingOverlay');
+    const boredEndingOverlay = document.getElementById('boredEndingOverlay');
+    const adventurerEndingOverlay = document.getElementById('adventurerEndingOverlay');
+    const timeTravelerEndingOverlay = document.getElementById('timeTravelerEndingOverlay');
     const secretTimer = document.getElementById('secretTimer');
+    
     const emojis = ['😴', '😒', '😠', '😡', '🤬'];
+    const backgroundColors = ['#f7f0e6', '#fbe8d3', '#f5c9c3', '#ff8a8a', '#ff4c4c'];
 
     emoji.addEventListener('click', () => {
       tapCount++;
       lastTapTime = Date.now();
 
-      // Update emoji expression based on tap count
+      // Update emoji expression and background color based on tap count
       const emojiIndex = Math.min(Math.floor(tapCount / 5), emojis.length - 1);
       emoji.textContent = emojis[emojiIndex];
+      document.body.style.backgroundColor = backgroundColors[emojiIndex];
 
       // Update message text
       if (tapCount === 1) {
@@ -132,7 +171,30 @@
         callPolice();
       }
 
-      // Clear text after 3 seconds
+      // Update health bar
+      health -= 5;  // Reduce health with each tap
+      healthBar.style.width = health + '%';
+
+      // Check for defender ending (player saves emoji from getting too angry)
+      if (tapCount >= 20 && health > 50) {
+        showOverlay(heroEndingOverlay);
+      }
+
+      // Bored Ending (no action for too long)
+      if (tapCount === 0 && (Date.now() - lastTapTime) > 300000) {
+        showOverlay(boredEndingOverlay);
+      }
+
+      // Time Traveler Ending (track multiple sessions)
+      if ((Date.now() - gameStartTime) > 86400000) {
+        showOverlay(timeTravelerEndingOverlay);
+      }
+
+      // Mini-Quest Example: Tap 10 times exactly for the adventurer ending
+      if (tapCount === 10 && health === 50) {
+        showOverlay(adventurerEndingOverlay);
+      }
+
       text.style.opacity = '1';
       setTimeout(() => {
         text.style.opacity = '0';
@@ -147,19 +209,26 @@
       }, 1000);
     }
 
+    function showOverlay(overlayElement) {
+      overlayElement.style.opacity = '1';
+      setTimeout(() => {
+        overlayElement.style.opacity = '0';
+      }, 5000);
+    }
+
     function checkEndings() {
       const currentTime = Date.now();
 
-      // Check for good ending (wait 2 minutes without tapping)
+      // Good Ending (wait 2 minutes without tapping)
       if (tapCount === 14 && (currentTime - lastTapTime) >= 120000) {
         goodEndingOverlay.style.opacity = '1';
         emoji.textContent = '😴';
         return;
       }
 
-      // Check for true ending (wait 24 hours without tapping)
+      // True Ending (wait 24 hours without tapping)
       if (tapCount === 0 && (currentTime - gameStartTime) >= 86400000) {
-        trueEndingOverlay.style.opacity = '1';
+        timeTravelerEndingOverlay.style.opacity = '1';
         emoji.textContent = '🧞';
         return;
       }
