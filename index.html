@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Не буди эмодзи - История и игра</title>
+  <title>Не буди эмодзи - Обновленная версия</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
     html, body {
@@ -42,6 +42,7 @@
       transition: all 0.4s ease;
       cursor: pointer;
       user-select: none;
+      margin-top: 3vh;
     }
     .emoji.active {
       transform: scale(1.2);
@@ -59,48 +60,23 @@
       color: #666;
       margin-top: 2vh;
     }
+    /* Beautiful Progress Bar Above Emoji */
     .progress-bar {
-      position: fixed;
-      bottom: 5vh;
+      position: relative;
       width: 80%;
-      height: 4vh;
-      background-color: #ddd;
+      height: 3vh;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 3vh;
     }
     .progress {
       height: 100%;
-      background-color: #4caf50;
+      background: linear-gradient(to right, #4caf50, #81c784);
       width: 100%;
+      border-radius: 15px;
       transition: width 0.5s ease;
-    }
-    /* Story overlay */
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      flex-direction: column;
-      z-index: 100;
-    }
-    .overlay-text {
-      font-size: 5vw;
-      margin-bottom: 3vh;
-      padding: 0 5vw;
-    }
-    .start-button {
-      background-color: #ffffff;
-      color: #2c2c2c;
-      padding: 2vh 5vw;
-      border: none;
-      font-size: 4vw;
-      cursor: pointer;
-      border-radius: 8px;
     }
     .power-up {
       position: absolute;
@@ -132,6 +108,10 @@
   </div>
   
   <div class="emoji-container">
+    <!-- Beautiful Health Bar Above Emoji -->
+    <div class="progress-bar">
+      <div class="progress" id="healthBar"></div>
+    </div>
     <div class="emoji" id="sleepyEmoji">😴</div>
     <div class="sleepy-text" id="sleepyText"></div>
   </div>
@@ -142,23 +122,8 @@
     Все права защищены. <a href="#" style="color: #666;">Политика конфиденциальности</a> | <a href="#" style="color: #666;">Условия использования</a>
   </div>
 
-  <!-- Полоса здоровья/терпения -->
-  <div class="progress-bar">
-    <div class="progress" id="healthBar"></div>
-  </div>
-
   <!-- Power-Up -->
   <div class="power-up" id="powerUp">🔋</div>
-
-  <!-- Story and hint overlay -->
-  <div class="overlay" id="storyOverlay">
-    <div class="overlay-text">
-      Эмодзи наконец-то заснул после долгого дня. Но он очень капризный - любой звук или движение могут его разбудить!
-      <br><br>
-      Ваша задача: не разбудить эмодзи! Каждое нажатие делает его все злее, но можно собирать бонусы, чтобы вернуть терпение. Продвигайтесь через уровни, каждый из которых будет сложнее предыдущего.
-    </div>
-    <button class="start-button" id="startButton">Начать игру</button>
-  </div>
 
   <script>
     let tapCount = 0;
@@ -169,8 +134,6 @@
     const text = document.getElementById('sleepyText');
     const healthBar = document.getElementById('healthBar');
     const powerUp = document.getElementById('powerUp');
-    const storyOverlay = document.getElementById('storyOverlay');
-    const startButton = document.getElementById('startButton');
     const messages = ['😴', '😒', '😠', '😡', '🤬'];
 
     // Sounds for each emoji state
@@ -183,10 +146,6 @@
     ];
 
     const powerUpSound = new Audio('https://www.myinstants.com/media/sounds/powerup.mp3');
-
-    startButton.addEventListener('click', () => {
-      storyOverlay.style.display = 'none'; // Hide the story and start the game
-    });
 
     emoji.addEventListener('click', () => {
       tapCount++;
@@ -259,5 +218,6 @@
   </script>
 </body>
 </html>
+
 
 
