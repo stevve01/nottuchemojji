@@ -43,9 +43,45 @@
       cursor: pointer;
       user-select: none;
       margin-top: 3vh;
+      animation: float 3s ease-in-out infinite;
     }
     .emoji.active {
       transform: scale(1.2);
+      animation: shake 0.5s ease;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    @keyframes shake {
+      0% { transform: translateX(0) scale(1.2); }
+      25% { transform: translateX(-5px) scale(1.25); }
+      50% { transform: translateX(5px) scale(1.15); }
+      75% { transform: translateX(-5px) scale(1.25); }
+      100% { transform: translateX(0) scale(1.2); }
+    }
+    
+    .points-display {
+      position: absolute;
+      top: 10vh;
+      right: 5vw;
+      font-size: 4vw;
+      color: #4CAF50;
+      font-weight: bold;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .points-animation {
+      animation: pointsRise 1s forwards;
+    }
+    
+    @keyframes pointsRise {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-50px); opacity: 0; }
     }
     .sleepy-text {
       font-size: 4.5vw;
@@ -154,6 +190,9 @@
 
   <!-- Power-Up -->
   <div class="power-up" id="powerUp">🔋</div>
+  
+  <!-- Points Display -->
+  <div class="points-display" id="pointsDisplay"></div>
 
   <!-- Story and hint overlay -->
   <div class="overlay" id="storyOverlay">
@@ -169,6 +208,7 @@
     let tapCount = 0;
     let health = 100;
     let level = 1;
+    let score = 0;
     const maxLevels = 5;
     const emoji = document.getElementById('sleepyEmoji');
     const text = document.getElementById('sleepyText');
@@ -176,6 +216,7 @@
     const powerUp = document.getElementById('powerUp');
     const storyOverlay = document.getElementById('storyOverlay');
     const startButton = document.getElementById('startButton');
+    const pointsDisplay = document.getElementById('pointsDisplay');
     const messages = ['😴', '😒', '😠', '😡', '🤬'];
 
     // Sounds for each emoji state
@@ -201,9 +242,25 @@
       // Play different sounds based on the emoji's mood
       clickSounds[emojiIndex].play();
 
+      // Add visual feedback with animation
+      emoji.classList.add('active');
+      setTimeout(() => {
+        emoji.classList.remove('active');
+      }, 400);
+
       // Уменьшаем терпение с увеличением сложности на уровнях
       health -= 5 * level; 
       healthBar.style.width = health + '%';
+
+      // Add points for tapping, but decrease if health is low
+      if(health > 30) {
+        score += 10 * level;
+      } else {
+        score += 5 * level;
+      }
+      
+      // Show point animation
+      showPointsAnimation(10 * level);
 
       if (tapCount === 5) showMessage('Прекрати тыкать меня!');
       if (tapCount === 15) showMessage('Ты меня злишь...');
@@ -211,6 +268,17 @@
       if (tapCount % 10 === 0) showPowerUp();
       if (tapCount % 20 === 0) nextLevel();
     });
+
+    function showPointsAnimation(points) {
+      pointsDisplay.textContent = '+' + points;
+      pointsDisplay.style.opacity = '1';
+      pointsDisplay.classList.add('points-animation');
+      
+      setTimeout(() => {
+        pointsDisplay.style.opacity = '0';
+        pointsDisplay.classList.remove('points-animation');
+      }, 1000);
+    }
 
     function showMessage(message) {
       text.textContent = message;
@@ -231,11 +299,17 @@
       healthBar.style.width = health + '%';
       powerUpSound.play();
       powerUp.style.display = 'none';
+      
+      // Add bonus points for collecting power-up
+      score += 50 * level;
+      showPointsAnimation(50 * level);
     }
 
     function nextLevel() {
       if (level < maxLevels) {
         level++;
+        health = Math.min(health + 20, 100); // Restore some health between levels
+        healthBar.style.width = health + '%';
         alert(`Уровень ${level}! Игра усложняется!`);
       } else {
         triggerFinalEnding();
@@ -243,12 +317,12 @@
     }
 
     function triggerBadEnding() {
-      alert("Плохая концовка! Ты разозлил эмодзи!");
+      alert(`Плохая концовка! Ты разозлил эмодзи! Финальный счет: ${score}`);
       restartGame();
     }
 
     function triggerFinalEnding() {
-      alert("Ты прошел игру! Продолжение будет во 2-й части!");
+      alert(`Ты прошел игру! Финальный счет: ${score}. Продолжение будет во 2-й части!`);
       restartGame();
     }
 
@@ -256,10 +330,12 @@
       tapCount = 0;
       health = 100;
       level = 1;
+      score = 0;
       emoji.textContent = '😴';
       healthBar.style.width = '100%';
       text.textContent = '';
       powerUp.style.display = 'none';
+      pointsDisplay.textContent = '';
     }
   </script>
 </body>
